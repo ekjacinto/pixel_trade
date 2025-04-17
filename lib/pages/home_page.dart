@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:csv/csv.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/card.dart' as models;
 import '../services/card_service.dart';
+import '../services/auth_service.dart';
 
 void main() {
   runApp(MaterialApp(home: MainScreen()));
@@ -48,29 +46,61 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _screens = [
+    const CardsTab(),
+    const WishlistTab(),
+    const ProfileScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("TCGP Trader"),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: "Cards"),
-              Tab(text: "Wishlist"),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("TCGP Trader"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              final authService = AuthService();
+              await authService.signOut();
+            },
           ),
-        ),
-        body: const TabBarView(
-          children: [
-            CardsTab(),
-            WishlistTab(),
-          ],
-        ),
+        ],
+      ),
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: "Wishlist",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: "Profile",
+          ),
+        ],
       ),
     );
   }
