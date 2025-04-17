@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"tcgp-trade","appId":"1:1041852781395:android:5fd5fafc9c9d595779c7a6","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"tcgp-trade","configurations":{"android":"1:1041852781395:android:5fd5fafc9c9d595779c7a6","ios":"1:1041852781395:ios:d59265a2d071821d79c7a6"}}}}}}

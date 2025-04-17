@@ -1,0 +1,2 @@
+C:/Users/ethan/Documents/Projects/TCGP_Trade/android/app/.cxx/Debug/1aq2a3l5/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/ethan/Documents/Projects/TCGP_Trade/android/app/.cxx/Debug/1aq2a3l5/armeabi-v7a/CMakeFiles/rebuild_cache.dir

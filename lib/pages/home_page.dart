@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/card.dart' as models;
+import '../services/card_service.dart';
 
 void main() {
   runApp(MaterialApp(home: MainScreen()));
@@ -81,65 +84,36 @@ class CardsTab extends StatefulWidget {
 }
 
 class _CardsTabState extends State<CardsTab> {
-  late Future<List<Map<String, String>>> _cardsFuture;
-  List<Map<String, String>> _allCards = [];
-  List<Map<String, String>> _filteredCards = [];
+  final CardService _cardService = CardService();
+  List<models.Card> _filteredCards = [];
   final TextEditingController _searchController = TextEditingController();
-  final Set<Map<String, String>> _wishlist = {}; // Stores wishlist items
-
-  @override
-  void initState() {
-    super.initState();
-    _cardsFuture = _loadCSV();
-  }
-
-  Future<List<Map<String, String>>> _loadCSV() async {
-    try {
-      final csvString = await rootBundle.loadString('assets/cards.csv');
-      List<List<dynamic>> csvData = CsvToListConverter().convert(csvString);
-
-      final parsedCards = csvData.skip(1).map((row) {
-        return {
-          'name': row[0].toString(),
-          'imageUrl': row[2].toString(),
-        };
-      }).toList();
-
-      setState(() {
-        _allCards = parsedCards;
-        _filteredCards = _allCards;
-      });
-
-      return parsedCards;
-    } catch (e) {
-      debugPrint("Error loading CSV: $e");
-      return [];
-    }
-  }
+  final Set<models.Card> _wishlist = {};
 
   void _filterCards(String query) {
     setState(() {
-      _filteredCards = _allCards
-          .where((card) => card['name']!.toLowerCase().contains(query.toLowerCase()))
+      _filteredCards = _filteredCards
+          .where((card) => card.name.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
   }
 
-  void _showCardPopup(Map<String, String> card) {
+  void _showCardPopup(models.Card card) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(card['name']!),
+          title: Text(card.name),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.network(card['imageUrl']!, height: 150, fit: BoxFit.contain),
+              Image.network(card.imageUrl, height: 150, fit: BoxFit.contain),
+              const SizedBox(height: 10),
+              Text(card.description),
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    _wishlist.add(card); // Add to wishlist
+                    _wishlist.add(card);
                   });
                   Navigator.of(context).pop();
                 },
@@ -169,13 +143,20 @@ class _CardsTabState extends State<CardsTab> {
           ),
         ),
         Expanded(
-          child: FutureBuilder<List<Map<String, String>>>(
-            future: _cardsFuture,
+          child: StreamBuilder<List<models.Card>>(
+            stream: _cardService.getCards(),
             builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text("No cards available."));
+              }
+
+              final cards = snapshot.data ?? [];
+              if (_filteredCards.isEmpty) {
+                _filteredCards = cards;
               }
 
               return GridView.builder(
@@ -195,7 +176,7 @@ class _CardsTabState extends State<CardsTab> {
                       children: [
                         Expanded(
                           child: Image.network(
-                            card['imageUrl']!,
+                            card.imageUrl,
                             width: double.infinity,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) =>
@@ -203,7 +184,7 @@ class _CardsTabState extends State<CardsTab> {
                           ),
                         ),
                         Text(
-                          card['name']!,
+                          card.name,
                           textAlign: TextAlign.center,
                           style: const TextStyle(fontSize: 14),
                         ),
@@ -242,8 +223,8 @@ class _WishlistTabState extends State<WishlistTab> {
       itemBuilder: (context, index) {
         final card = cardsTabState._wishlist.elementAt(index);
         return ListTile(
-          leading: Image.network(card['imageUrl']!, width: 50, fit: BoxFit.contain),
-          title: Text(card['name']!),
+          leading: Image.network(card.imageUrl, width: 50, fit: BoxFit.contain),
+          title: Text(card.name),
           trailing: IconButton(
             icon: const Icon(Icons.remove_circle, color: Colors.red),
             onPressed: () {
