@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TCGP Trader',
+      title: 'TCGP Trade',
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
@@ -66,12 +66,6 @@ class AuthWrapper extends StatelessWidget {
     return StreamBuilder(
       stream: _authService.authStateChanges,
       builder: (context, snapshot) {
-        // Debug print for auth state changes
-        print('Auth state changed: ${snapshot.connectionState}, hasData: ${snapshot.hasData}');
-        if (snapshot.hasError) {
-          print('Auth state error: ${snapshot.error}');
-        }
-        
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
