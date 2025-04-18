@@ -5,10 +5,10 @@ class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
   @override
-  _SignupPageState createState() => _SignupPageState();
+  SignupPageState createState() => SignupPageState();
 }
 
-class _SignupPageState extends State<SignupPage> {
+class SignupPageState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -32,17 +32,69 @@ class _SignupPageState extends State<SignupPage> {
     setState(() => _isLoading = true);
 
     try {
-      await _authService.createUserWithEmailAndPassword(
+      print('Starting signup process...');
+      final username = _usernameController.text.trim();
+      print('Username to be set: $username');
+      
+      final userCredential = await _authService.createUserWithEmailAndPassword(
         _emailController.text.trim(),
         _passwordController.text.trim(),
+        username,
       );
-      // Navigation will be handled by the auth state listener
+      
+      print('Signup successful. User ID: ${userCredential.user?.uid}');
+      print('Verifying display name...');
+      
+      // Verify the display name was set
+      final user = _authService.currentUser;
+      print('Current user display name: ${user?.displayName}');
+      
+      if (mounted) {
+        if (user?.displayName == username) {
+          print('Username verified successfully');
+          Navigator.of(context).pop(); // Return to login page after successful signup
+        } else {
+          print('Warning: Username verification failed');
+          // Still navigate but show a warning
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Account created but username might take a moment to update'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      }
     } catch (e) {
+      print('Error during signup: $e');
+      
+      if (!mounted) return;
+      
+      String errorMessage = 'An error occurred during sign up';
+      
+      if (e.toString().contains('email-already-in-use')) {
+        errorMessage = 'This email is already registered';
+      } else if (e.toString().contains('invalid-email')) {
+        errorMessage = 'The email address is badly formatted';
+      } else if (e.toString().contains('weak-password')) {
+        errorMessage = 'The password is too weak';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       );
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -53,7 +105,9 @@ class _SignupPageState extends State<SignupPage> {
         title: const Text('Sign Up'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
         ),
       ),
       body: SingleChildScrollView(

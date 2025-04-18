@@ -21,8 +21,35 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TCGP Trader',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0A192F), // Deep dark blue
+        primaryColor: const Color(0xFF64FFDA), // Cyan accent
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF172A45), // Dark blue surface
+          elevation: 0,
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF172A45), // Dark blue surface
+          selectedItemColor: Color(0xFF64FFDA), // Cyan accent
+          unselectedItemColor: Color(0xFF8892B0), // Muted blue-grey
+        ),
+        cardColor: const Color(0xFF172A45), // Dark blue surface
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF64FFDA), // Cyan accent
+            foregroundColor: const Color(0xFF0A192F), // Deep dark blue
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFFE6F1FF)), // Light blue-white
+          bodyMedium: TextStyle(color: Color(0xFFE6F1FF)), // Light blue-white
+          titleLarge: TextStyle(color: Color(0xFFE6F1FF)), // Light blue-white
+        ),
       ),
       home: AuthWrapper(),
     );
@@ -39,17 +66,30 @@ class AuthWrapper extends StatelessWidget {
     return StreamBuilder(
       stream: _authService.authStateChanges,
       builder: (context, snapshot) {
+        // Debug print for auth state changes
+        print('Auth state changed: ${snapshot.connectionState}, hasData: ${snapshot.hasData}');
+        if (snapshot.hasError) {
+          print('Auth state error: ${snapshot.error}');
+        }
+        
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        if (snapshot.hasData) {
-          return const HomePage();
-        }
-
-        return const LoginPage();
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          child: snapshot.hasData
+              ? const HomePage(key: ValueKey('home'))
+              : const LoginPage(key: ValueKey('login')),
+        );
       },
     );
   }

@@ -23,8 +23,12 @@ class Card {
 
   factory Card.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return Card.fromMap(data, doc.id);
+  }
+
+  factory Card.fromMap(Map<String, dynamic> data, [String? id]) {
     return Card(
-      id: doc.id,
+      id: id ?? data['id'] ?? '',
       name: data['name'] ?? '',
       description: data['description'] ?? '',
       imageUrl: data['image_url'] ?? '',
@@ -33,5 +37,17 @@ class Card {
       url: data['url'] ?? '',
       cardNumber: data['card_number'] ?? 0,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'description': description,
+      'image_url': imageUrl,
+      'rarity_symbols': raritySymbols,
+      'set': set,
+      'url': url,
+      'card_number': cardNumber,
+    };
   }
 } 
