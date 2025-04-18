@@ -5,6 +5,9 @@ import '../models/trade_listing.dart';
 import '../services/card_service.dart';
 import '../services/auth_service.dart';
 import '../services/trade_service.dart';
+import 'chat_screen.dart';
+import '../services/chat_service.dart';
+import '../models/chat.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -15,13 +18,14 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  static const int _numScreens = 4;  // Number of bottom nav items
+  static const int _numScreens = 5;  // Updated number of screens
 
-  final List<Widget> _screens = const [
-    HomePage(),
-    CollectionScreen(),
-    TradeTab(),
-    ProfileScreen(),
+  final List<Widget> _screens = [
+    const HomePage(),
+    const CollectionScreen(),
+    const TradeTab(),
+    MessagesTab(),  // Added MessagesTab
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -34,47 +38,49 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Ensure index is within bounds
     final safeIndex = _selectedIndex.clamp(0, _numScreens - 1);
     if (safeIndex != _selectedIndex) {
       setState(() => _selectedIndex = safeIndex);
     }
 
     return Scaffold(
-      body: _screens[safeIndex],
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Colors.white.withOpacity(0.1),
+              width: 1,
+            ),
+          ),
         ),
         child: BottomNavigationBar(
-          currentIndex: safeIndex,
+          currentIndex: _selectedIndex,
           onTap: _onItemTapped,
           type: BottomNavigationBarType.fixed,
           backgroundColor: const Color(0xFF152B44),
-          elevation: 0,
           selectedItemColor: const Color(0xFF4FD1C5),
-          unselectedItemColor: const Color(0xFF6B7280),
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          showSelectedLabels: true,
-          showUnselectedLabels: true,
+          unselectedItemColor: Colors.white54,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_rounded),
-              label: "Home",
+              label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.collections_bookmark_rounded),
-              label: "Collection",
+              icon: Icon(Icons.collections_rounded),
+              label: 'Collection',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.swap_horiz_rounded),
-              label: "Trade",
+              label: 'Trade',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.message_rounded),
+              label: 'Messages',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_rounded),
-              label: "Profile",
+              label: 'Profile',
             ),
           ],
         ),
@@ -92,13 +98,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  static const int _numScreens = 4;  // Number of bottom nav items
+  static const int _numScreens = 5;  // Updated to include Messages tab
 
-  final List<Widget> _screens = const [
-    CardsTab(),
-    CollectionScreen(),
-    TradeTab(),
-    ProfileScreen(),
+  final List<Widget> _screens = [
+    const CardsTab(),
+    const CollectionScreen(),
+    const TradeTab(),
+    MessagesTab(),  // Added Messages tab
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -147,6 +154,10 @@ class _HomePageState extends State<HomePage> {
             BottomNavigationBarItem(
               icon: Icon(Icons.swap_horiz_rounded),
               label: "Trade",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.message_rounded),
+              label: "Messages",
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_rounded),
@@ -1252,30 +1263,54 @@ class TradeTabState extends State<TradeTab> {
                       ),
                       padding: const EdgeInsets.all(16),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildUserAvatar(listing.userId, listing.userName),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
                             children: [
-                              Text(
-                                listing.userName,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Text(
-                                'Trading Card',
-                                style: TextStyle(
-                                  color: const Color(0xFF4FD1C5).withOpacity(0.8),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              _buildUserAvatar(listing.userId, listing.userName),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    listing.userName,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    'Trading Card',
+                                    style: TextStyle(
+                                      color: const Color(0xFF4FD1C5).withOpacity(0.8),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
+                          // Add message button if it's not the user's own listing
+                          if (listing.userId != _authService.currentUser?.uid)
+                            IconButton(
+                              icon: const Icon(
+                                Icons.message_rounded,
+                                color: Color(0xFF4FD1C5),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                      otherUserId: listing.userId,
+                                      otherUserName: listing.userName,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                         ],
                       ),
                     ),
@@ -1432,5 +1467,114 @@ class TradeTabState extends State<TradeTab> {
         ),
       ),
     );
+  }
+}
+
+class MessagesTab extends StatelessWidget {
+  final ChatService _chatService = ChatService();
+
+  MessagesTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Chat>>(
+      stream: _chatService.getUserChats(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error: ${snapshot.error}'),
+          );
+        }
+
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        final chats = snapshot.data!;
+
+        if (chats.isEmpty) {
+          return const Center(
+            child: Text(
+              'No messages yet',
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 16,
+              ),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: chats.length,
+          itemBuilder: (context, index) {
+            final chat = chats[index];
+            return ListTile(
+              leading: const CircleAvatar(
+                child: Icon(Icons.person),
+              ),
+              title: FutureBuilder<String?>(
+                future: AuthService().getUsername(
+                  chat.participants.firstWhere(
+                    (id) => id != _chatService.userId,
+                  ),
+                ),
+                builder: (context, snapshot) {
+                  return Text(
+                    snapshot.data ?? 'Loading...',
+                    style: const TextStyle(color: Colors.white),
+                  );
+                },
+              ),
+              subtitle: Text(
+                chat.lastMessage,
+                style: const TextStyle(color: Colors.white54),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: Text(
+                _formatTimestamp(chat.lastMessageAt),
+                style: const TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+              onTap: () async {
+                final otherUserId = chat.participants.firstWhere(
+                  (id) => id != _chatService.userId,
+                );
+                final username = await AuthService().getUsername(otherUserId);
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(
+                        otherUserId: otherUserId,
+                        otherUserName: username ?? 'Unknown User',
+                      ),
+                    ),
+                  );
+                }
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inDays > 7) {
+      return '${timestamp.month}/${timestamp.day}/${timestamp.year}';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return 'Just now';
+    }
   }
 }

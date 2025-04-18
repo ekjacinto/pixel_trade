@@ -32,9 +32,7 @@ class SignupPageState extends State<SignupPage> {
     setState(() => _isLoading = true);
 
     try {
-      print('Starting signup process...');
       final username = _usernameController.text.trim();
-      print('Username to be set: $username');
       
       final userCredential = await _authService.createUserWithEmailAndPassword(
         _emailController.text.trim(),
@@ -42,19 +40,13 @@ class SignupPageState extends State<SignupPage> {
         username,
       );
       
-      print('Signup successful. User ID: ${userCredential.user?.uid}');
-      print('Verifying display name...');
-      
       // Verify the display name was set
       final user = _authService.currentUser;
-      print('Current user display name: ${user?.displayName}');
       
       if (mounted) {
         if (user?.displayName == username) {
-          print('Username verified successfully');
           Navigator.of(context).pop(); // Return to login page after successful signup
         } else {
-          print('Warning: Username verification failed');
           // Still navigate but show a warning
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -66,8 +58,6 @@ class SignupPageState extends State<SignupPage> {
         }
       }
     } catch (e) {
-      print('Error during signup: $e');
-      
       if (!mounted) return;
       
       String errorMessage = 'An error occurred during sign up';

@@ -35,18 +35,12 @@ class LoginPageState extends State<LoginPage> {
       );
       
       if (!mounted) return;
-      
-      // Debug print to verify successful login
-      print('Successfully signed in: ${userCredential.user?.email}');
-      
       // The navigation will be handled by the AuthWrapper's StreamBuilder
       // No need to navigate manually
       
     } catch (e) {
       if (!mounted) return;
       
-      // Debug print for error
-      print('Sign in error: $e');
       
       String errorMessage = 'An error occurred during sign in';
       
