@@ -103,4 +103,22 @@ class AuthService {
       return null;
     }
   }
+
+  // Delete user account
+  Future<void> deleteAccount() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('No user is currently signed in');
+      }
+
+      // Delete user data from Firestore
+      await _firestore.collection('users').doc(user.uid).delete();
+
+      // Delete the user account
+      await user.delete();
+    } catch (e) {
+      rethrow;
+    }
+  }
 } 
