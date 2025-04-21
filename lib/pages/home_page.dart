@@ -920,12 +920,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () async {
                           await _authService.signOut();
-                          if (context.mounted) {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(builder: (context) => const LoginPage()),
-                              (route) => false,
-                            );
-                          }
+                          // Let the AuthWrapper handle navigation
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red.withOpacity(0.1),

@@ -72,18 +72,13 @@ class AuthWrapper extends StatelessWidget {
           );
         }
 
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 500),
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-          child: snapshot.hasData
-              ? const HomePage(key: ValueKey('home'))
-              : const LoginPage(key: ValueKey('login')),
-        );
+        // If there's no user data, show the login page
+        if (!snapshot.hasData) {
+          return const LoginPage();
+        }
+
+        // If we have user data, show the home page
+        return const HomePage();
       },
     );
   }
