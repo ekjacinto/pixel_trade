@@ -112,12 +112,35 @@ class AuthService {
         throw Exception('No user is currently signed in');
       }
 
-      // Delete user data from Firestore
+      // Get all chats where the user is a participant
+      final QuerySnapshot chatsSnapshot = await _firestore
+          .collection('chats')
+          .where('participants', arrayContains: user.uid)
+          .get();
+
+      print('Found ${chatsSnapshot.docs.length} chats to delete');
+      
+      // Delete each chat document
+      for (var doc in chatsSnapshot.docs) {
+        try {
+          // Get the chat reference
+          DocumentReference chatRef = _firestore.collection('chats').doc(doc.id);
+          
+          // Delete the chat document
+          await chatRef.delete();
+          print('Deleted chat: ${doc.id}');
+        } catch (e) {
+          print('Error deleting chat ${doc.id}: $e');
+        }
+      }
+
+      // Delete user document
       await _firestore.collection('users').doc(user.uid).delete();
 
-      // Delete the user account
+      // Finally, delete the user account
       await user.delete();
     } catch (e) {
+      print('Error in deleteAccount: $e');
       rethrow;
     }
   }
