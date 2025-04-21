@@ -995,6 +995,10 @@ class TradeTabState extends State<TradeTab> {
   void _showCreateTradeDialog(BuildContext context) {
     models.Card? selectedCard;
     List<String> wantedCardIds = [];
+    final TextEditingController offeredSearchController = TextEditingController();
+    final TextEditingController wantedSearchController = TextEditingController();
+    String offeredSearchQuery = '';
+    String wantedSearchQuery = '';
 
     showDialog(
       context: context,
@@ -1029,6 +1033,28 @@ class TradeTabState extends State<TradeTab> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    // Search bar for offered cards
+                    TextField(
+                      controller: offeredSearchController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Search your cards...',
+                        hintStyle: const TextStyle(color: Colors.white60),
+                        prefixIcon: const Icon(Icons.search, color: Colors.white60),
+                        filled: true,
+                        fillColor: Colors.white10,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          offeredSearchQuery = value.toLowerCase();
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8),
                     StreamBuilder<List<models.Card>>(
                       stream: _cardService.getPokedex(),
                       builder: (context, snapshot) {
@@ -1048,12 +1074,10 @@ class TradeTabState extends State<TradeTab> {
                         }
 
                         final cards = snapshot.data ?? [];
-                        if (cards.isEmpty) {
-                          return const Text(
-                            'No cards in your Pokedex',
-                            style: TextStyle(color: Colors.white70),
-                          );
-                        }
+                        final filteredCards = offeredSearchQuery.isEmpty
+                            ? cards
+                            : cards.where((card) =>
+                                card.name.toLowerCase().contains(offeredSearchQuery)).toList();
 
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1070,13 +1094,37 @@ class TradeTabState extends State<TradeTab> {
                             isExpanded: true,
                             dropdownColor: const Color(0xFF152B44),
                             underline: Container(),
-                            items: cards.map((card) {
+                            items: filteredCards.map((card) {
                               return DropdownMenuItem<String>(
                                 key: ValueKey(card.id),
                                 value: card.id,
-                                child: Text(
-                                  card.name,
-                                  style: const TextStyle(color: Colors.white),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          card.imageUrl,
+                                          width: 60,
+                                          height: 84,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          card.name,
+                                          style: const TextStyle(color: Colors.white),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             }).toList(),
@@ -1101,6 +1149,28 @@ class TradeTabState extends State<TradeTab> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    // Search bar for wanted cards
+                    TextField(
+                      controller: wantedSearchController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Search cards...',
+                        hintStyle: const TextStyle(color: Colors.white60),
+                        prefixIcon: const Icon(Icons.search, color: Colors.white60),
+                        filled: true,
+                        fillColor: Colors.white10,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          wantedSearchQuery = value.toLowerCase();
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8),
                     StreamBuilder<List<models.Card>>(
                       stream: _cardService.getCards(),
                       builder: (context, snapshot) {
@@ -1120,6 +1190,11 @@ class TradeTabState extends State<TradeTab> {
                         }
 
                         final cards = snapshot.data ?? [];
+                        final filteredCards = wantedSearchQuery.isEmpty
+                            ? cards
+                            : cards.where((card) =>
+                                card.name.toLowerCase().contains(wantedSearchQuery)).toList();
+
                         return Container(
                           constraints: BoxConstraints(
                             maxHeight: MediaQuery.of(context).size.height * 0.3,
@@ -1130,18 +1205,35 @@ class TradeTabState extends State<TradeTab> {
                           ),
                           child: ListView.builder(
                             shrinkWrap: true,
-                            itemCount: cards.length,
+                            itemCount: filteredCards.length,
                             itemBuilder: (context, index) {
-                              final card = cards[index];
+                              final card = filteredCards[index];
                               return CheckboxListTile(
-                                title: Text(
-                                  card.name,
-                                  style: const TextStyle(color: Colors.white),
+                                title: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(4),
+                                      child: Image.network(
+                                        card.imageUrl,
+                                        width: 40,
+                                        height: 56,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        card.name,
+                                        style: const TextStyle(color: Colors.white),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 value: wantedCardIds.contains(card.id),
                                 checkColor: const Color(0xFF152B44),
-                                fillColor: WidgetStateProperty.resolveWith(
-                                  (states) => states.contains(WidgetState.selected)
+                                fillColor: MaterialStateProperty.resolveWith(
+                                  (states) => states.contains(MaterialState.selected)
                                       ? const Color(0xFF4FD1C5)
                                       : Colors.white54,
                                 ),
