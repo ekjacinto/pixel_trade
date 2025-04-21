@@ -33,7 +33,6 @@ class AuthService {
     String username,
   ) async {
     try {
-      print('Creating user with email: $email and username: $username');
       
       // Create the user with email and password
       final userCredential = await _auth.createUserWithEmailAndPassword(
@@ -41,7 +40,6 @@ class AuthService {
         password: password,
       );
 
-      print('User created successfully with ID: ${userCredential.user?.uid}');
 
       // Make sure we have a user
       if (userCredential.user == null) {
@@ -50,14 +48,12 @@ class AuthService {
 
       // Update the user's profile with display name
       await userCredential.user!.updateProfile(displayName: username);
-      print('Profile updated with display name: $username');
 
       // Force a reload of the user data
       await userCredential.user!.reload();
       
       // Get the fresh user data
       final updatedUser = _auth.currentUser;
-      print('Updated user display name: ${updatedUser?.displayName}');
 
       // Store additional user data in Firestore
       final userDocRef = _firestore.collection('users').doc(userCredential.user!.uid);
@@ -68,15 +64,12 @@ class AuthService {
         'lastUpdated': FieldValue.serverTimestamp(),
       });
       
-      print('User data stored in Firestore');
       
       // Verify the data was stored
       final userDoc = await userDocRef.get();
-      print('Verification - Stored user data: ${userDoc.data()}');
 
       return userCredential;
     } catch (e) {
-      print('Error in createUserWithEmailAndPassword: $e');
       rethrow;
     }
   }
@@ -94,7 +87,6 @@ class AuthService {
       }
       return null;
     } catch (e) {
-      print('Error getting user photo URL: $e');
       return null;
     }
   }
@@ -108,7 +100,6 @@ class AuthService {
       }
       return null;
     } catch (e) {
-      print('Error getting username: $e');
       return null;
     }
   }
