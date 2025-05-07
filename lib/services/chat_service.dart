@@ -7,7 +7,6 @@ class ChatService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String get userId => _auth.currentUser?.uid ?? '';
-  String get _userName => _auth.currentUser?.displayName ?? 'Anonymous';
 
   // Get or create a chat between two users
   Future<String> getOrCreateChat(String otherUserId) async {
@@ -41,17 +40,6 @@ class ChatService {
   // Send a message
   Future<void> sendMessage(String chatId, String message) async {
     if (userId.isEmpty) throw Exception('Not authenticated');
-
-    final messageDoc = await _firestore
-        .collection('chats')
-        .doc(chatId)
-        .collection('messages')
-        .add({
-      'senderId': userId,
-      'senderName': _userName,
-      'message': message,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
 
     // Update chat's last message
     await _firestore.collection('chats').doc(chatId).update({
