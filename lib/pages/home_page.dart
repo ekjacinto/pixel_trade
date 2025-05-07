@@ -12,10 +12,10 @@ class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  MainScreenState createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   static const int _numScreens = 5;  // Updated number of screens
 
@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               width: 1,
             ),
           ),
@@ -92,10 +92,10 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   static const int _numScreens = 5;  // Updated to include Messages tab
 
@@ -390,7 +390,9 @@ class CardsTabState extends State<CardsTab> {
                             onPressed: () async {
                               await _cardService.addToWishlist(card);
                               if (!mounted) return;
-                              Navigator.pop(context);
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
                             },
                           ),
                           ActionButton(
@@ -399,7 +401,9 @@ class CardsTabState extends State<CardsTab> {
                             onPressed: () async {
                               await _cardService.addToPokedex(card);
                               if (!mounted) return;
-                              Navigator.pop(context);
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
                             },
                           ),
                         ],
@@ -919,10 +923,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: ElevatedButton.icon(
                         onPressed: () async {
                           await _authService.signOut();
-                          // Let the AuthWrapper handle navigation
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.withOpacity(0.1),
+                          backgroundColor: Colors.red.withValues(alpha: 0.1),
                           foregroundColor: Colors.red,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -1231,8 +1234,8 @@ class TradeTabState extends State<TradeTab> {
                                 ),
                                 value: wantedCardIds.contains(card.id),
                                 checkColor: const Color(0xFF152B44),
-                                fillColor: MaterialStateProperty.resolveWith(
-                                  (states) => states.contains(MaterialState.selected)
+                                fillColor: WidgetStateProperty.resolveWith(
+                                  (states) => states.contains(WidgetState.selected)
                                       ? const Color(0xFF4FD1C5)
                                       : Colors.white54,
                                 ),
@@ -1312,7 +1315,7 @@ class TradeTabState extends State<TradeTab> {
             ),
           ),
           child: CircleAvatar(
-            backgroundColor: const Color(0xFF4FD1C5).withOpacity(0.2),
+            backgroundColor: const Color(0xFF4FD1C5).withValues(alpha: 0.2),
             radius: 20,
             backgroundImage: snapshot.data != null ? NetworkImage(snapshot.data!) : null,
             child: snapshot.data == null
@@ -1414,7 +1417,7 @@ class TradeTabState extends State<TradeTab> {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -1428,7 +1431,7 @@ class TradeTabState extends State<TradeTab> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            const Color(0xFF4FD1C5).withOpacity(0.2),
+                            const Color(0xFF4FD1C5).withValues(alpha: 0.2),
                             Colors.transparent,
                           ],
                           begin: Alignment.topCenter,
@@ -1460,7 +1463,7 @@ class TradeTabState extends State<TradeTab> {
                                   Text(
                                     'Trading Card',
                                     style: TextStyle(
-                                      color: const Color(0xFF4FD1C5).withOpacity(0.8),
+                                      color: const Color(0xFF4FD1C5).withValues(alpha: 0.8),
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -1518,7 +1521,7 @@ class TradeTabState extends State<TradeTab> {
                           const SizedBox(height: 8),
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             padding: const EdgeInsets.all(8),
@@ -1587,7 +1590,7 @@ class TradeTabState extends State<TradeTab> {
                                 final cards = snapshot.data?.where((card) => card != null).cast<models.Card>().toList() ?? [];
                                 return Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.2),
+                                    color: Colors.black.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Column(

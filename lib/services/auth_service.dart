@@ -47,14 +47,11 @@ class AuthService {
       }
 
       // Update the user's profile with display name
-      await userCredential.user!.updateProfile(displayName: username);
+      await userCredential.user!.updateDisplayName(username);
 
       // Force a reload of the user data
       await userCredential.user!.reload();
       
-      // Get the fresh user data
-      final updatedUser = _auth.currentUser;
-
       // Store additional user data in Firestore
       final userDocRef = _firestore.collection('users').doc(userCredential.user!.uid);
       await userDocRef.set({
@@ -63,10 +60,6 @@ class AuthService {
         'createdAt': FieldValue.serverTimestamp(),
         'lastUpdated': FieldValue.serverTimestamp(),
       });
-      
-      
-      // Verify the data was stored
-      final userDoc = await userDocRef.get();
 
       return userCredential;
     } catch (e) {
@@ -117,21 +110,13 @@ class AuthService {
           .collection('chats')
           .where('participants', arrayContains: user.uid)
           .get();
-
-      print('Found ${chatsSnapshot.docs.length} chats to delete');
       
       // Delete each chat document
-      for (var doc in chatsSnapshot.docs) {
-        try {
-          // Get the chat reference
+      for (var doc in chatsSnapshot.docs) {          // Get the chat reference
           DocumentReference chatRef = _firestore.collection('chats').doc(doc.id);
-          
           // Delete the chat document
           await chatRef.delete();
-          print('Deleted chat: ${doc.id}');
-        } catch (e) {
-          print('Error deleting chat ${doc.id}: $e');
-        }
+
       }
 
       // Delete user document
@@ -140,7 +125,6 @@ class AuthService {
       // Finally, delete the user account
       await user.delete();
     } catch (e) {
-      print('Error in deleteAccount: $e');
       rethrow;
     }
   }

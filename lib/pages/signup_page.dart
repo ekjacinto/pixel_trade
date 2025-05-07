@@ -34,7 +34,7 @@ class SignupPageState extends State<SignupPage> {
     try {
       final username = _usernameController.text.trim();
       
-      final userCredential = await _authService.createUserWithEmailAndPassword(
+      await _authService.createUserWithEmailAndPassword(
         _emailController.text.trim(),
         _passwordController.text.trim(),
         username,

@@ -29,7 +29,7 @@ class LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      final userCredential = await _authService.signInWithEmailAndPassword(
+      await _authService.signInWithEmailAndPassword(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
