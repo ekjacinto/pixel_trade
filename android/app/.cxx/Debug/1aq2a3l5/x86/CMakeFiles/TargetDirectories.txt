@@ -1,2 +1,0 @@
-C:/Users/ethan/Documents/Projects/TCGP_Trade/android/app/.cxx/Debug/1aq2a3l5/x86/CMakeFiles/edit_cache.dir
-C:/Users/ethan/Documents/Projects/TCGP_Trade/android/app/.cxx/Debug/1aq2a3l5/x86/CMakeFiles/rebuild_cache.dir
