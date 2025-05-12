@@ -1,4 +1,4 @@
-package com.cppekjacinto.tcgp_trade
+package com.cppekjacinto.pixeltrade
 
 import io.flutter.embedding.android.FlutterActivity
 

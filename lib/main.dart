@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tcgp_trade/pages/login_page.dart';
-import 'package:tcgp_trade/pages/home_page.dart';
-import 'package:tcgp_trade/services/auth_service.dart';
+import 'package:pixel_trade/pages/login_page.dart';
+import 'package:pixel_trade/pages/home_page.dart';
+import 'package:pixel_trade/services/auth_service.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TCGP Trade',
+      title: 'Pixel Trade',
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,

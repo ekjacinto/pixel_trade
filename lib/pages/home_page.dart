@@ -194,7 +194,7 @@ class CardsTabState extends State<CardsTab> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "TCGP Trade",
+          "Pixel Trade",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,

@@ -41,7 +41,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.cppekjacinto.tcgp_trade"
+    namespace "com.cppekjacinto.pixeltrade"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
@@ -55,7 +55,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.cppekjacinto.tcgp_trade"
+        applicationId "com.cppekjacinto.pixeltrade"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
