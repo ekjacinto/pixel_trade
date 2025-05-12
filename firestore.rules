@@ -29,8 +29,8 @@ service cloud.firestore {
         allow read, write: if isOwner(userId);
       }
       
-      // Allow users to manage their own pokedex subcollection
-      match /pokedex/{cardId} {
+      // Allow users to manage their own collection subcollection
+      match /collection/{cardId} {
         allow read, write: if isOwner(userId);
       }
     }

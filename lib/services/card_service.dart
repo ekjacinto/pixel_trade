@@ -30,14 +30,14 @@ class CardService {
     });
   }
 
-  // Get user's pokedex
-  Stream<List<Card>> getPokedex() {
+  // Get user's collection
+  Stream<List<Card>> getCollection() {
     if (_userId.isEmpty) return Stream.value([]);
     
     return _firestore
         .collection('users')
         .doc(_userId)
-        .collection('pokedex')
+        .collection('collection')
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => Card.fromFirestore(doc)).toList();
@@ -56,14 +56,14 @@ class CardService {
         .set(card.toMap());
   }
 
-  // Add card to user's pokedex
-  Future<void> addToPokedex(Card card) async {
+  // Add card to user's collection
+  Future<void> addToCollection(Card card) async {
     if (_userId.isEmpty) return;
     
     await _firestore
         .collection('users')
         .doc(_userId)
-        .collection('pokedex')
+        .collection('collection')
         .doc(card.id)
         .set(card.toMap());
   }
@@ -80,14 +80,14 @@ class CardService {
         .delete();
   }
 
-  // Remove card from user's pokedex
-  Future<void> removeFromPokedex(String cardId) async {
+  // Remove card from user's collection
+  Future<void> removeFromCollection(String cardId) async {
     if (_userId.isEmpty) return;
     
     await _firestore
         .collection('users')
         .doc(_userId)
-        .collection('pokedex')
+        .collection('collection')
         .doc(cardId)
         .delete();
   }
@@ -106,14 +106,14 @@ class CardService {
     return doc.exists;
   }
 
-  // Check if card is in user's pokedex
-  Future<bool> isInPokedex(String cardId) async {
+  // Check if card is in user's collection
+  Future<bool> isInCollection(String cardId) async {
     if (_userId.isEmpty) return false;
     
     final doc = await _firestore
         .collection('users')
         .doc(_userId)
-        .collection('pokedex')
+        .collection('collection')
         .doc(cardId)
         .get();
     

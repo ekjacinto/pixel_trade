@@ -397,9 +397,9 @@ class CardsTabState extends State<CardsTab> {
                           ),
                           ActionButton(
                             icon: Icons.collections_bookmark_rounded,
-                            label: "Pokedex",
+                            label: "Collect",
                             onPressed: () async {
-                              await _cardService.addToPokedex(card);
+                              await _cardService.addToCollection(card);
                               if (!mounted) return;
                               if (context.mounted) {
                                 Navigator.pop(context);
@@ -499,7 +499,7 @@ class CollectionScreen extends StatelessWidget {
                   ),
                   Tab(
                     icon: Icon(Icons.collections_bookmark_rounded),
-                    text: "Pokedex",
+                    text: "Collection",
                   ),
                 ],
               ),
@@ -508,7 +508,7 @@ class CollectionScreen extends StatelessWidget {
               child: TabBarView(
                 children: [
                   WishlistTab(),
-                  PokedexTab(),
+                  CollectionTab(),
                 ],
               ),
             ),
@@ -656,20 +656,20 @@ class WishlistTabState extends State<WishlistTab> {
   }
 }
 
-class PokedexTab extends StatefulWidget {
-  const PokedexTab({super.key});
+class CollectionTab extends StatefulWidget {
+  const CollectionTab({super.key});
 
   @override
-  PokedexTabState createState() => PokedexTabState();
+  CollectionTabState createState() => CollectionTabState();
 }
 
-class PokedexTabState extends State<PokedexTab> {
+class CollectionTabState extends State<CollectionTab> {
   final CardService _cardService = CardService();
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<models.Card>>(
-      stream: _cardService.getPokedex(),
+      stream: _cardService.getCollection(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -688,8 +688,8 @@ class PokedexTabState extends State<PokedexTab> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final pokedex = snapshot.data ?? [];
-        if (pokedex.isEmpty) {
+        final collection = snapshot.data ?? [];
+        if (collection.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -701,7 +701,7 @@ class PokedexTabState extends State<PokedexTab> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "Your Pokedex is empty",
+                  "Your Collection is empty",
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
@@ -724,9 +724,9 @@ class PokedexTabState extends State<PokedexTab> {
             mainAxisSpacing: 16,
             childAspectRatio: 0.7,
           ),
-          itemCount: pokedex.length,
+          itemCount: collection.length,
           itemBuilder: (context, index) {
-            final card = pokedex[index];
+            final card = collection[index];
             return Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
@@ -779,7 +779,7 @@ class PokedexTabState extends State<PokedexTab> {
                       child: IconButton(
                         icon: const Icon(Icons.remove_circle_rounded),
                         color: Colors.red,
-                        onPressed: () => _cardService.removeFromPokedex(card.id),
+                        onPressed: () => _cardService.removeFromCollection(card.id),
                       ),
                     ),
                   ),
@@ -1058,7 +1058,7 @@ class TradeTabState extends State<TradeTab> {
                     ),
                     const SizedBox(height: 8),
                     StreamBuilder<List<models.Card>>(
-                      stream: _cardService.getPokedex(),
+                      stream: _cardService.getCollection(),
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
                           return Text(
